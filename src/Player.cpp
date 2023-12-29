@@ -1,11 +1,13 @@
 #include "Player.h"
+#include <SDL_image.h>
 #include <iostream>
 
 const float Player::BIOME_CHANGE_COOLDOWN = 1.0f;
+SDL_Texture* Player::playerTexture = nullptr;
 
 Player::Player(int x, int y) : x(x), y(y), speed(5), currentBiome(""), lastBiome(""), timeSinceLastBiomeChange(0.0f) {    
-    srcRect = { 0, 0, 32, 32 }; // Size of the texture frame
-    destRect = { x, y, 32, 32 }; // Size and position on the screen
+    srcRect = { 0, 0, 32, 64 }; // Update the size of the texture frame to 32x64
+    destRect = { x, y, 32, 64 }; // Update the size and position on the screen to 32x64
 }
 
 void Player::update(float deltaTime) {
@@ -21,38 +23,30 @@ void Player::update(float deltaTime) {
 void Player::handleInput(const SDL_Event& event) {
     if (event.type == SDL_KEYDOWN) {
         switch (event.key.keysym.sym) {
-            case SDLK_UP:
             case SDLK_w:
                 setMovingUp(true);
                 break;
-            case SDLK_DOWN:
             case SDLK_s:
                 setMovingDown(true);
                 break;
-            case SDLK_LEFT:
             case SDLK_a:
                 setMovingLeft(true);
                 break;
-            case SDLK_RIGHT:
             case SDLK_d:
                 setMovingRight(true);
                 break;
         }
     } else if (event.type == SDL_KEYUP) {
         switch (event.key.keysym.sym) {
-            case SDLK_UP:
             case SDLK_w:
                 setMovingUp(false);
                 break;
-            case SDLK_DOWN:
             case SDLK_s:
                 setMovingDown(false);
                 break;
-            case SDLK_LEFT:
             case SDLK_a:
                 setMovingLeft(false);
                 break;
-            case SDLK_RIGHT:
             case SDLK_d:
                 setMovingRight(false);
                 break;
@@ -61,9 +55,33 @@ void Player::handleInput(const SDL_Event& event) {
 }
 
 void Player::render(SDL_Renderer* renderer, const SDL_Rect& camera) {
+    if (!playerTexture) {
+        std::cerr << "Player texture not loaded." << std::endl;
+        return;
+    }
+
     SDL_Rect renderQuad = {destRect.x - camera.x, destRect.y - camera.y, destRect.w, destRect.h};
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red color for the player
-    SDL_RenderFillRect(renderer, &renderQuad);
+    
+    // Render the player texture instead of a red square
+    SDL_RenderCopy(renderer, playerTexture, &srcRect, &renderQuad);
+}
+
+void Player::loadPlayerTexture(SDL_Renderer* renderer, const char* filePath) {
+    // Load the texture from a file
+    SDL_Texture* newTexture = IMG_LoadTexture(renderer, filePath);
+    if(newTexture == nullptr) {
+        std::cerr << "Failed to load player texture: " << IMG_GetError() << std::endl;
+        return;
+    }
+    // Assign the new texture to the playerTexture member
+    playerTexture = newTexture;
+}
+
+void Player::destroyTexture() {
+    if (playerTexture != nullptr) {
+        SDL_DestroyTexture(playerTexture);
+        playerTexture = nullptr;
+    }
 }
 
 void Player::setMovingUp(bool move) {

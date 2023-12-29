@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Player.h"
 #include <iostream>
 #include <SDL_image.h>
 
@@ -41,6 +42,8 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
             } else {
                 // Load the tileset texture for the Tile class
                 Tile::loadTilesetTexture(renderer, "assets/tilemap.png");
+                // Load the player texture
+                Player::loadPlayerTexture(renderer, "assets/player.png"); // This is the new line to add
             }
 
             // Set draw color for renderer to white
@@ -141,7 +144,7 @@ void Game::clean() {
     // Clean up the tileset texture
     Tile::freeTilesetTexture();
 
-    // Destroy the window and renderer
+    Player::destroyTexture();
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();

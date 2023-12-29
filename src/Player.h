@@ -16,6 +16,8 @@ public:
     void setMovingDown(bool move);
     void setMovingLeft(bool move);
     void setMovingRight(bool move);
+    static void loadPlayerTexture(SDL_Renderer* renderer, const char* filePath);
+    static void destroyTexture();
 
 private:
     int x, y, speed;
@@ -25,6 +27,7 @@ private:
     std::string lastBiome; // New member
     float timeSinceLastBiomeChange; // New member
     static const float BIOME_CHANGE_COOLDOWN; // New member
+    static SDL_Texture* playerTexture;
 };
 
 #endif
