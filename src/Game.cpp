@@ -1,7 +1,7 @@
 #include "Game.h"
 #include <iostream>
 
-Game::Game() : isRunning(false), window(nullptr), renderer(nullptr), chunkSize(32), seed(12345) {
+Game::Game() : isRunning(false), window(nullptr), renderer(nullptr), chunkSize(32), seed(12345), gameMap(seed) {
     player = new Player(100, 100); // Initialize player with a position
     camera = {0, 0, 800, 600};
 
@@ -92,26 +92,25 @@ void Game::update() {
     int visibleEndY = std::ceil(static_cast<float>(camera.y + camera.h) / (chunkSize * 32)) + 1;
 
     // Generate new chunks within the visible range
-    for (int y = visibleStartY; y <= visibleEndY; ++y) {
-        for (int x = visibleStartX; x <= visibleEndX; ++x) {
+    for (int y = visibleStartY; y <= visibleEndY; y++) {
+        for (int x = visibleStartX; x <= visibleEndX; x++) {
             if (!gameMap.isChunkGenerated(x, y)) {
                 gameMap.generateChunk(x, y, seed);
-                std::cout << "Generating Chunk: " << x << ", " << y << std::endl;
+                // std::cout << "Generating Chunk: " << x << ", " << y << std::endl;
             }
         }
     }
 
     // Remove chunks that are out of view
-    auto it = gameMap.chunks.begin();
-    while (it != gameMap.chunks.end()) {
-        int chunkX = it->first.first;
-        int chunkY = it->first.second;
-        if (chunkX < visibleStartX || chunkX > visibleEndX || chunkY < visibleStartY || chunkY > visibleEndY) {
-            std::cout << "Unrendering Chunk: " << chunkX << ", " << chunkY << std::endl;
-            it = gameMap.chunks.erase(it);
-        } else {
-            ++it;
-        }
+    gameMap.removeOutOfViewChunks(visibleStartX, visibleEndX, visibleStartY, visibleEndY);
+
+    // Biome detection and notification
+    static std::string lastBiome = "";
+    std::string currentBiome = gameMap.getBiomeAt(player->getX(), player->getY());
+
+    if (currentBiome != lastBiome) {
+        std::cout << "Player entered " << currentBiome << " biome." << std::endl;
+        lastBiome = currentBiome;
     }
 
     frameTime = SDL_GetTicks() - frameStart;

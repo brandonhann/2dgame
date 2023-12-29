@@ -7,7 +7,8 @@ enum TileType {
     GRASS,
     WATER,
     WALL,
-    SAND
+    SAND,
+    SNOW
 };
 
 class Tile {
@@ -15,6 +16,7 @@ public:
     Tile(TileType type, int x, int y);
     void render(SDL_Renderer* renderer, SDL_Rect& camera);
     bool isWalkable();
+    TileType getType() const { return type; }
 
 private:
     TileType type;

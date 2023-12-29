@@ -22,6 +22,9 @@ void Tile::render(SDL_Renderer* renderer, SDL_Rect& camera) {
         case SAND:
             SDL_SetRenderDrawColor(renderer, 237, 201, 175, 255); // Sandy color for beaches
             break;
+        case SNOW:
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White for snow
+            break;
     }
 
     SDL_RenderFillRect(renderer, &renderQuad);
