@@ -20,7 +20,11 @@ Game::~Game() {
 }
 
 void Game::init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen) {
-    int flags = fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
+    int flags = SDL_WINDOW_RESIZABLE; // Add resizable flag
+    if (fullscreen) {
+        flags |= SDL_WINDOW_FULLSCREEN;
+    }
+
     if (SDL_Init(SDL_INIT_VIDEO) == 0) {
         window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -68,6 +72,14 @@ void Game::handleEvents() {
                     case SDLK_RIGHT:
                         player->setMovingRight(false);
                         break;
+                }
+                break;
+            case SDL_WINDOWEVENT:
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    // Update the camera size with the new window dimensions
+                    camera.w = event.window.data1;
+                    camera.h = event.window.data2;
+                    // Optionally, you can re-adjust any other relevant game properties or layout here
                 }
                 break;
         }
