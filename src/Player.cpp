@@ -1,12 +1,14 @@
 #include "Player.h"
 #include <iostream>
 
-Player::Player(int x, int y) : x(x), y(y), speed(5), movingUp(false), movingDown(false), movingLeft(false), movingRight(false) {
+const float Player::BIOME_CHANGE_COOLDOWN = 1.0f;
+
+Player::Player(int x, int y) : x(x), y(y), speed(5), currentBiome(""), lastBiome(""), timeSinceLastBiomeChange(0.0f) {    
     srcRect = { 0, 0, 32, 32 }; // Size of the texture frame
     destRect = { x, y, 32, 32 }; // Size and position on the screen
 }
 
-void Player::update() {
+void Player::update(float deltaTime) {
     if (movingUp) y -= speed;
     if (movingDown) y += speed;
     if (movingLeft) x -= speed;
@@ -63,7 +65,6 @@ void Player::render(SDL_Renderer* renderer, const SDL_Rect& camera) {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red color for the player
     SDL_RenderFillRect(renderer, &renderQuad);
 }
-
 
 void Player::setMovingUp(bool move) {
     movingUp = move;

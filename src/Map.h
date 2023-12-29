@@ -22,7 +22,6 @@ public:
     void removeOutOfViewChunks(int visibleStartX, int visibleEndX, int visibleStartY, int visibleEndY);
     bool isChunkGenerated(int chunkX, int chunkY) const;
     std::string getBiomeAt(int x, int y);
-    bool isOutOfBounds(int x, int y);
     TileType getTileAt(int x, int y);
 
     static const int numberOfChunksWidth; // Define these based on your map's size

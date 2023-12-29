@@ -65,23 +65,23 @@ void Game::updateCamera() {
 }
 
 void Game::update() {
-    frameStart = SDL_GetTicks();
+    // Get the time at the start of the frame
+    Uint32 frameStart = SDL_GetTicks();
 
     // Function to calculate the chunk index for a given coordinate
     auto getChunkIndex = [this](int coordinate) -> int {
-        if (coordinate >= 0) {
-            return coordinate / (32 * chunkSize);
-        } else {
-            return (coordinate - 32 * chunkSize + 1) / (32 * chunkSize);
-        }
+        return coordinate / (32 * chunkSize);
     };
 
-    int currentChunkX = getChunkIndex(player->getX());
-    int currentChunkY = getChunkIndex(player->getY());
+    float deltaTime = (SDL_GetTicks() - frameStart) / 1000.0f;
 
-    player->update();
+    // Update the player's movement
+    player->update(deltaTime);
+
+    // Update the camera to follow the player
     updateCamera();
 
+    // Check if the player has moved to a new chunk and if so, generate new chunks and remove old ones
     int newChunkX = getChunkIndex(player->getX());
     int newChunkY = getChunkIndex(player->getY());
 
@@ -96,7 +96,6 @@ void Game::update() {
         for (int x = visibleStartX; x <= visibleEndX; x++) {
             if (!gameMap.isChunkGenerated(x, y)) {
                 gameMap.generateChunk(x, y, seed);
-                // std::cout << "Generating Chunk: " << x << ", " << y << std::endl;
             }
         }
     }
@@ -104,16 +103,10 @@ void Game::update() {
     // Remove chunks that are out of view
     gameMap.removeOutOfViewChunks(visibleStartX, visibleEndX, visibleStartY, visibleEndY);
 
-    // Biome detection and notification
-    static std::string lastBiome = "";
-    std::string currentBiome = gameMap.getBiomeAt(player->getX(), player->getY());
+    // Calculate how long the update took
+    Uint32 frameTime = SDL_GetTicks() - frameStart;
 
-    if (currentBiome != lastBiome) {
-        std::cout << "Player entered " << currentBiome << " biome." << std::endl;
-        lastBiome = currentBiome;
-    }
-
-    frameTime = SDL_GetTicks() - frameStart;
+    // If we're running faster than our frame delay, then delay the frame to achieve the desired frame rate
     if (frameDelay > frameTime) {
         SDL_Delay(frameDelay - frameTime);
     }

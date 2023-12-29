@@ -123,12 +123,6 @@ bool Map::checkAdjacentToWater(int x, int y, const std::vector<std::vector<TileT
     return false;
 }
 
-bool Map::isOutOfBounds(int x, int y) {
-    int totalWidth = chunkSize * numberOfChunksWidth;
-    int totalHeight = chunkSize * numberOfChunksHeight;
-    return x < 0 || y < 0 || x >= totalWidth || y >= totalHeight;
-}
-
 TileType Map::getTileAt(int x, int y) {
     int chunkX = x / chunkSize;
     int chunkY = y / chunkSize;
@@ -175,21 +169,6 @@ void Map::removeOutOfViewChunks(int visibleStartX, int visibleEndX, int visibleS
         } else {
             ++it;
         }
-    }
-}
-
-std::string Map::getBiomeAt(int x, int y) {
-    int chunkX = x / chunkSize;
-    int chunkY = y / chunkSize;
-    int localX = x % chunkSize;
-    int localY = y % chunkSize;
-
-    float biomeValue = biomeNoise.GetNoise((float)(localX + chunkX * chunkSize), (float)(localY + chunkY * chunkSize));
-
-    if (biomeValue > grasslandThreshold) {
-        return "Grassland";
-    } else {
-        return "Tundra";
     }
 }
 
