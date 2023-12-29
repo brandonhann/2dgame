@@ -10,6 +10,7 @@ public:
     int getY() const;
     void update();
     void render(SDL_Renderer* renderer, const SDL_Rect& camera);
+    void handleInput(const SDL_Event& event);
     void setMovingUp(bool move);
     void setMovingDown(bool move);
     void setMovingLeft(bool move);

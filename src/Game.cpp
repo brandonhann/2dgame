@@ -43,43 +43,15 @@ void Game::handleEvents() {
                 isRunning = false;
                 break;
             case SDL_KEYDOWN:
-                switch (event.key.keysym.sym) {
-                    case SDLK_UP:
-                        player->setMovingUp(true);
-                        break;
-                    case SDLK_DOWN:
-                        player->setMovingDown(true);
-                        break;
-                    case SDLK_LEFT:
-                        player->setMovingLeft(true);
-                        break;
-                    case SDLK_RIGHT:
-                        player->setMovingRight(true);
-                        break;
-                }
-                break;
             case SDL_KEYUP:
-                switch (event.key.keysym.sym) {
-                    case SDLK_UP:
-                        player->setMovingUp(false);
-                        break;
-                    case SDLK_DOWN:
-                        player->setMovingDown(false);
-                        break;
-                    case SDLK_LEFT:
-                        player->setMovingLeft(false);
-                        break;
-                    case SDLK_RIGHT:
-                        player->setMovingRight(false);
-                        break;
-                }
+                player->handleInput(event); // Delegate to player
                 break;
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     // Update the camera size with the new window dimensions
                     camera.w = event.window.data1;
                     camera.h = event.window.data2;
-                    // Optionally, you can re-adjust any other relevant game properties or layout here
+                    // Optionally, re-adjust any other relevant game properties or layout here
                 }
                 break;
         }

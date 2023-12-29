@@ -16,6 +16,48 @@ void Player::update() {
     destRect.y = y;
 }
 
+void Player::handleInput(const SDL_Event& event) {
+    if (event.type == SDL_KEYDOWN) {
+        switch (event.key.keysym.sym) {
+            case SDLK_UP:
+            case SDLK_w:
+                setMovingUp(true);
+                break;
+            case SDLK_DOWN:
+            case SDLK_s:
+                setMovingDown(true);
+                break;
+            case SDLK_LEFT:
+            case SDLK_a:
+                setMovingLeft(true);
+                break;
+            case SDLK_RIGHT:
+            case SDLK_d:
+                setMovingRight(true);
+                break;
+        }
+    } else if (event.type == SDL_KEYUP) {
+        switch (event.key.keysym.sym) {
+            case SDLK_UP:
+            case SDLK_w:
+                setMovingUp(false);
+                break;
+            case SDLK_DOWN:
+            case SDLK_s:
+                setMovingDown(false);
+                break;
+            case SDLK_LEFT:
+            case SDLK_a:
+                setMovingLeft(false);
+                break;
+            case SDLK_RIGHT:
+            case SDLK_d:
+                setMovingRight(false);
+                break;
+        }
+    }
+}
+
 void Player::render(SDL_Renderer* renderer, const SDL_Rect& camera) {
     SDL_Rect renderQuad = {destRect.x - camera.x, destRect.y - camera.y, destRect.w, destRect.h};
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red color for the player
