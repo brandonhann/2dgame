@@ -1,33 +1,59 @@
 #include "Tile.h"
+#include <SDL_image.h> // Make sure to include SDL_image for texture loading
+#include <iostream>
 
+// Static member for the texture
+SDL_Texture* Tile::tilesetTexture = nullptr;
 
+// Constructor remains the same
 Tile::Tile(TileType type, int x, int y) : type(type) {
     srcRect = {0, 0, 32, 32}; // Size of the texture frame
     destRect = {x, y, 32, 32}; // Size and position on the screen
 }
 
+// Static method to load the tileset texture
+void Tile::loadTilesetTexture(SDL_Renderer* renderer, const char* filePath) {
+    // Load the texture from a file
+    SDL_Texture* newTexture = IMG_LoadTexture(renderer, filePath);
+    if(newTexture == nullptr) {
+        std::cerr << "Failed to load texture: " << SDL_GetError() << std::endl;
+        return;
+    }
+    // If a texture is already loaded, destroy it before replacing
+    if(Tile::tilesetTexture != nullptr) {
+        SDL_DestroyTexture(Tile::tilesetTexture);
+    }
+    Tile::tilesetTexture = newTexture;
+}
+
+// Render method now uses the texture
 void Tile::render(SDL_Renderer* renderer, SDL_Rect& camera) {
     SDL_Rect renderQuad = {destRect.x - camera.x, destRect.y - camera.y, destRect.w, destRect.h};
-
+    
+    // Here you'll set srcRect to the correct texture position based on the tile type
     switch(type) {
         case GRASS:
-            SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green for grass
+            srcRect.x = 0;
+            srcRect.y = 0;
             break;
         case WATER:
-            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Blue for water
-            break;
-        case WALL:
-            SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255); // Grey for walls
+            srcRect.x = 32;
+            srcRect.y = 0;
             break;
         case SAND:
-            SDL_SetRenderDrawColor(renderer, 237, 201, 175, 255); // Sandy color for beaches
+            srcRect.x = 64;
+            srcRect.y = 0;
             break;
         case SNOW:
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White for snow
+            srcRect.x = 96;
+            srcRect.y = 0;
             break;
+        // Add additional cases for other tile types
+        // ...
     }
 
-    SDL_RenderFillRect(renderer, &renderQuad);
+    // Render the part of the texture to the screen
+    SDL_RenderCopy(renderer, Tile::tilesetTexture, &srcRect, &renderQuad);
 }
 
 bool Tile::isWalkable() {

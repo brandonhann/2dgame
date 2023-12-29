@@ -1,5 +1,6 @@
 #include "Game.h"
 #include <iostream>
+#include <SDL_image.h>
 
 Game::Game() : isRunning(false), window(nullptr), renderer(nullptr), chunkSize(32), seed(12345), gameMap(seed) {
     player = new Player(100, 100); // Initialize player with a position
@@ -25,13 +26,29 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         flags |= SDL_WINDOW_FULLSCREEN;
     }
 
+    // Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) == 0) {
+        // Create window
         window = SDL_CreateWindow(title, xpos, ypos, width, height, flags);
+        
+        // Create renderer
         renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
         if (renderer) {
+            // Initialize SDL_image for image loading
+            int imgFlags = IMG_INIT_PNG;
+            if (!(IMG_Init(imgFlags) & imgFlags)) {
+                std::cerr << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
+            } else {
+                // Load the tileset texture for the Tile class
+                Tile::loadTilesetTexture(renderer, "assets/tilemap.png");
+            }
+
+            // Set draw color for renderer to white
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White background
         }
         isRunning = true;
+    } else {
+        std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
     }
 }
 
@@ -121,6 +138,10 @@ void Game::render() {
 }
 
 void Game::clean() {
+    // Clean up the tileset texture
+    Tile::freeTilesetTexture();
+
+    // Destroy the window and renderer
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();
