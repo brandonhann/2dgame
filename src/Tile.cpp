@@ -9,7 +9,6 @@ Tile::Tile(TileType type, int x, int y) : type(type) {
 void Tile::render(SDL_Renderer* renderer, SDL_Rect& camera) {
     SDL_Rect renderQuad = {destRect.x - camera.x, destRect.y - camera.y, destRect.w, destRect.h};
 
-    // Set color based on tile type (for example)
     switch(type) {
         case GRASS:
             SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // Green for grass
@@ -20,7 +19,9 @@ void Tile::render(SDL_Renderer* renderer, SDL_Rect& camera) {
         case WALL:
             SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255); // Grey for walls
             break;
-        // Add cases for other tile types if necessary
+        case SAND:
+            SDL_SetRenderDrawColor(renderer, 237, 201, 175, 255); // Sandy color for beaches
+            break;
     }
 
     SDL_RenderFillRect(renderer, &renderQuad);

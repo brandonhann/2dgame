@@ -8,20 +8,66 @@ Map::Map() {
 
 void Map::generateChunk(int chunkX, int chunkY, unsigned int seed) {
     std::cout << "Generating Chunk: " << chunkX << ", " << chunkY << std::endl;
-    FastNoiseLite noise;
+    FastNoiseLite noise, riverNoise;
     noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
     noise.SetSeed(seed);
 
+    riverNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+    riverNoise.SetSeed(seed + 1);
+    riverNoise.SetFrequency(0.02);
+
     Chunk newChunk;
     newChunk.tiles.reserve(chunkSize);
+
+    std::vector<std::vector<TileType>> tempTypes(chunkSize, std::vector<TileType>(chunkSize));
+
+    for (int y = 0; y < chunkSize; ++y) {
+        for (int x = 0; x < chunkSize; ++x) {
+            float biomeValue = noise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize));
+            float riverValue = std::abs(riverNoise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize)));
+            TileType type = riverValue < 0.1 ? WATER : (biomeValue > 0 ? GRASS : WATER);
+            tempTypes[y][x] = type;
+        }
+    }
 
     for (int y = 0; y < chunkSize; ++y) {
         std::vector<Tile> row;
         row.reserve(chunkSize);
         for (int x = 0; x < chunkSize; ++x) {
-            float noiseValue = noise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize));
-            TileType type = noiseValue > 0 ? GRASS : WATER;
-            row.emplace_back(type, (x + chunkX * chunkSize) * 32, (y + chunkY * chunkSize) * 32);
+            TileType type = tempTypes[y][x];
+
+            if (type == WATER) {
+                // Check if adjacent to GRASS only (not SAND or WATER)
+                bool adjacentToGrass = false;
+                for (int dy = -1; dy <= 1; ++dy) {
+                    for (int dx = -1; dx <= 1; ++dx) {
+                        int nx = x + dx;
+                        int ny = y + dy;
+                        if (nx >= 0 && nx < chunkSize && ny >= 0 && ny < chunkSize &&
+                            tempTypes[ny][nx] == GRASS) {
+                            adjacentToGrass = true;
+                            break;
+                        }
+                    }
+                    if (adjacentToGrass) break;
+                }
+
+                if (adjacentToGrass) {
+                    // Change adjacent GRASS to SAND
+                    for (int dy = -1; dy <= 1; ++dy) {
+                        for (int dx = -1; dx <= 1; ++dx) {
+                            int nx = x + dx;
+                            int ny = y + dy;
+                            if (nx >= 0 && nx < chunkSize && ny >= 0 && ny < chunkSize &&
+                                tempTypes[ny][nx] == GRASS) {
+                                tempTypes[ny][nx] = SAND;
+                            }
+                        }
+                    }
+                }
+            }
+
+            row.emplace_back(tempTypes[y][x], (x + chunkX * chunkSize) * 32, (y + chunkY * chunkSize) * 32);
         }
         newChunk.tiles.push_back(std::move(row));
     }

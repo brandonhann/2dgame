@@ -6,7 +6,8 @@
 enum TileType {
     GRASS,
     WATER,
-    WALL
+    WALL,
+    SAND
 };
 
 class Tile {
