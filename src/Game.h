@@ -5,6 +5,7 @@
 #include "GameState.h"
 #include "Player.h"
 #include "Map.h"
+#include "Camera.h"
 
 class TitleScreen;  // Forward declaration of TitleScreen
 
@@ -17,7 +18,6 @@ public:
     void update();
     void render();
     void clean();
-    void updateCamera();
     bool running();
     void setGameState(GameState newState);
     void setSeed(unsigned int newSeed);
@@ -28,13 +28,13 @@ private:
     bool isRunning;
     SDL_Window* window;
     SDL_Renderer* renderer;
-    SDL_Rect camera;
+    Camera* camera; // Camera class pointer
     Player* player;
     const int FPS = 60;
     const int frameDelay = 1000 / FPS;
     Uint32 frameStart;
     int frameTime;
-    Map gameMap;  // Single declaration of gameMap
+    Map gameMap;
     int chunkSize;
     unsigned int seed;
     bool seedNeedsUpdate;

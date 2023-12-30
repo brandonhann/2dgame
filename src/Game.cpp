@@ -1,17 +1,18 @@
 #include "Game.h"
 #include "Player.h"
 #include "TitleScreen.h"
+#include "Camera.h"
 #include <iostream>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 
 Game::Game() 
     : gameState(GameState::TITLE_SCREEN), 
-      titleScreen(nullptr), // titleScreen should be initialized here
+      titleScreen(nullptr),
       isRunning(false), 
       window(nullptr), 
       renderer(nullptr), 
-      camera({0, 0, 800, 600}), // Initialize camera
+      camera(new Camera(0, 0, 800, 600)), // Corrected initialization
       player(new Player(100, 100)), // Initialize player
       FPS(60), 
       frameDelay(1000 / FPS), 
@@ -19,14 +20,12 @@ Game::Game()
       frameTime(0),
       chunkSize(32), 
       seed(12345), 
-      gameMap(seed),
+      gameMap(seed), // Initialize map with seed
       seedNeedsUpdate(false),
       displaySeedMessage(true),
       seedMessageStartTime(SDL_GetTicks())
-{ 
-    player = new Player(100, 100); // Initialize player with a position
-    camera = {0, 0, 800, 600};
-
+{
+    // Initialize player and camera only once, remove re-initialization from here
     int initialChunkX = player->getX() / (32 * chunkSize);
     int initialChunkY = player->getY() / (32 * chunkSize);
 
@@ -38,7 +37,8 @@ Game::Game()
 }
 
 Game::~Game() {
-    delete player; // Delete the player object
+    delete camera;
+    delete player;
 }
 
 void Game::init(const char* title, int xpos, int ypos, int width, int height, bool fullscreen) {
@@ -89,36 +89,32 @@ void Game::handleEvents() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT) {
-            isRunning = false;  // This will handle the window close button in any state.
-            return; // Exit the function early
+            isRunning = false;
+            return;
         }
 
         if (gameState == GameState::TITLE_SCREEN) {
             titleScreen->handleEvents(event, gameState);
             if (gameState == GameState::GAMEPLAY) {
-                // Convert user input from title screen to seed
                 std::string userInputSeed = titleScreen->getSeedText();
-                seed = hashStringToUnsignedInt(userInputSeed); // Convert string seed to unsigned int
-                gameMap = Map(seed); // Initialize map with the new seed
+                seed = hashStringToUnsignedInt(userInputSeed);
+                gameMap = Map(seed);
                 seedNeedsUpdate = false;
             }
         } else if (gameState == GameState::GAMEPLAY) {
-            // Handle events specific to the gameplay
             if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
-                player->handleInput(event); // Delegate to player input handling
+                player->handleInput(event);
             }
         }
 
-        // Handling window resize event
         if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
             int newWidth = event.window.data1;
             int newHeight = event.window.data2;
 
-            // Update camera size with the new window dimensions
-            camera.w = newWidth;
-            camera.h = newHeight;
+            SDL_Rect& cameraRect = camera->getCameraRect();
+            cameraRect.w = newWidth;
+            cameraRect.h = newHeight;
 
-            // Update title screen layout if we're on the title screen
             if (gameState == GameState::TITLE_SCREEN) {
                 titleScreen->handleWindowSizeChange(newWidth, newHeight);
             }
@@ -134,21 +130,13 @@ unsigned int Game::hashStringToUnsignedInt(const std::string& textSeed) {
     return hash;
 }
 
-void Game::updateCamera() {
-    // Center the camera over the player
-    camera.x = player->getX() - camera.w / 2;
-    camera.y = player->getY() - camera.h / 2;
-}
-
 void Game::update() {
-    // Check if the game state is GAMEPLAY and if the seed needs to be updated
     if (gameState == GameState::GAMEPLAY && seedNeedsUpdate) {
-        seed = static_cast<unsigned int>(time(nullptr)); // Generate a new seed
-        gameMap = Map(seed); // Reinitialize the map with the new seed
+        seed = static_cast<unsigned int>(time(nullptr));
+        gameMap = Map(seed);
         seedNeedsUpdate = false;
     }
 
-    // Rest of the update logic remains the same
     Uint32 frameStart = SDL_GetTicks();
 
     auto getChunkIndex = [this](int coordinate) -> int {
@@ -158,15 +146,13 @@ void Game::update() {
     float deltaTime = (SDL_GetTicks() - frameStart) / 1000.0f;
 
     player->update(deltaTime);
-    updateCamera();
+    camera->update(player->getX(), player->getY());
 
-    int newChunkX = getChunkIndex(player->getX());
-    int newChunkY = getChunkIndex(player->getY());
-
-    int visibleStartX = std::floor(static_cast<float>(camera.x) / (chunkSize * 32)) - 1;
-    int visibleEndX = std::ceil(static_cast<float>(camera.x + camera.w) / (chunkSize * 32)) + 1;
-    int visibleStartY = std::floor(static_cast<float>(camera.y) / (chunkSize * 32)) - 1;
-    int visibleEndY = std::ceil(static_cast<float>(camera.y + camera.h) / (chunkSize * 32)) + 1;
+    SDL_Rect cameraRect = camera->getCameraRect();
+    int visibleStartX = std::floor(static_cast<float>(cameraRect.x) / (chunkSize * 32)) - 1;
+    int visibleEndX = std::ceil(static_cast<float>(cameraRect.x + cameraRect.w) / (chunkSize * 32)) + 1;
+    int visibleStartY = std::floor(static_cast<float>(cameraRect.y) / (chunkSize * 32)) - 1;
+    int visibleEndY = std::ceil(static_cast<float>(cameraRect.y + cameraRect.h) / (chunkSize * 32)) + 1;
 
     for (int y = visibleStartY; y <= visibleEndY; y++) {
         for (int x = visibleStartX; x <= visibleEndX; x++) {
@@ -193,19 +179,15 @@ void Game::render() {
             break;
 
         case GameState::GAMEPLAY:
-            // Display seed message only once
             if (displaySeedMessage) {
                 std::string seedMessage = "Generated with seed: " + titleScreen->getSeedText();
-                // Display the message on the screen
-                // Note: You might want to render this text using SDL_ttf
-                std::cout << seedMessage << std::endl; // Temporary console output for testing
-                displaySeedMessage = false; // Set to false to prevent repeated printing
+                std::cout << seedMessage << std::endl;
+                displaySeedMessage = false;
             }
 
-            // Render game-related objects here
-            gameMap.render(renderer, camera);
-            player->render(renderer, camera);
-            // More gameplay rendering logic can be added here
+            SDL_Rect cameraRect = camera->getCameraRect();
+            gameMap.render(renderer, cameraRect);
+            player->render(renderer, cameraRect);
 
             SDL_RenderPresent(renderer);
             break;
