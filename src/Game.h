@@ -41,6 +41,7 @@ private:
     bool displaySeedMessage;
     Uint32 seedMessageStartTime;
     const Uint32 seedMessageDuration = 5000; // 5 seconds
+    unsigned int hashStringToUnsignedInt(const std::string& textSeed);
 };
 
 #endif

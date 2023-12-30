@@ -47,16 +47,6 @@ TileType Map::generateSnowTile(float noiseValue, float biomeValue, int x, int y)
 }
 
 void Map::generateChunk(int chunkX, int chunkY, unsigned int seed) {
-    // Setup for noise generation
-    FastNoiseLite noise, biomeNoise, riverNoise;
-    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    noise.SetSeed(seed);
-    biomeNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    biomeNoise.SetSeed(seed + 1);
-    riverNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    riverNoise.SetSeed(seed + 2);
-    riverNoise.SetFrequency(0.05);
-
     // Initialize the new chunk
     Chunk newChunk;
     newChunk.tiles.reserve(chunkSize);
@@ -67,9 +57,10 @@ void Map::generateChunk(int chunkX, int chunkY, unsigned int seed) {
     // First pass: Generate basic terrain types (grass and snow)
     for (int y = 0; y < chunkSize; ++y) {
         for (int x = 0; x < chunkSize; ++x) {
-            float biomeValue = biomeNoise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize));
-            float noiseValue = noise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize));
-            float riverNoiseValue = std::abs(riverNoise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize)));
+            // Note: Using class-level noise objects
+            float biomeValue = this->biomeNoise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize));
+            float noiseValue = this->noise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize));
+            float riverNoiseValue = std::abs(this->riverNoise.GetNoise((float)(x + chunkX * chunkSize), (float)(y + chunkY * chunkSize)));
 
             TileType type;
             if (biomeValue > grasslandThreshold) {

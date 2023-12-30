@@ -96,7 +96,11 @@ void Game::handleEvents() {
         if (gameState == GameState::TITLE_SCREEN) {
             titleScreen->handleEvents(event, gameState);
             if (gameState == GameState::GAMEPLAY) {
-                seedNeedsUpdate = true; // Flag to update the seed in the update method
+                // Convert user input from title screen to seed
+                std::string userInputSeed = titleScreen->getSeedText();
+                seed = hashStringToUnsignedInt(userInputSeed); // Convert string seed to unsigned int
+                gameMap = Map(seed); // Initialize map with the new seed
+                seedNeedsUpdate = false;
             }
         } else if (gameState == GameState::GAMEPLAY) {
             // Handle events specific to the gameplay
@@ -120,6 +124,14 @@ void Game::handleEvents() {
             }
         }
     }
+}
+
+unsigned int Game::hashStringToUnsignedInt(const std::string& textSeed) {
+    unsigned int hash = 0;
+    for (char c : textSeed) {
+        hash = hash * 31 + c;
+    }
+    return hash;
 }
 
 void Game::updateCamera() {
@@ -181,21 +193,18 @@ void Game::render() {
             break;
 
         case GameState::GAMEPLAY:
+            // Display seed message only once
+            if (displaySeedMessage) {
+                std::string seedMessage = "Generated with seed: " + titleScreen->getSeedText();
+                // Display the message on the screen
+                // Note: You might want to render this text using SDL_ttf
+                std::cout << seedMessage << std::endl; // Temporary console output for testing
+                displaySeedMessage = false; // Set to false to prevent repeated printing
+            }
+
             // Render game-related objects here
             gameMap.render(renderer, camera);
             player->render(renderer, camera);
-
-            // Display the seed message only once when entering the gameplay state
-            if (displaySeedMessage) {
-                std::string seedMessage = "Generated with seed: " + std::to_string(seed);
-                // Display the message on the screen
-                // Note: Add rendering logic for displaying the seed message on the screen
-                std::cout << seedMessage << std::endl; // Temporary console output for testing
-                
-                // After displaying the message, set the flag to false to prevent repeated displaying
-                displaySeedMessage = false;
-            }
-
             // More gameplay rendering logic can be added here
 
             SDL_RenderPresent(renderer);

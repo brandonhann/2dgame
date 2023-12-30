@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <string>
+#include <iostream>
 #include "GameState.h"
 #include "SDL_ttf.h"
 
@@ -13,6 +14,7 @@ public:
     void handleEvents(SDL_Event& event, GameState& gameState);
     void render();
     void handleWindowSizeChange(int newWidth, int newHeight);
+    std::string getSeedText() const;
 
 private:
     SDL_Renderer* renderer;

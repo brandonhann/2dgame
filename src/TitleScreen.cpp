@@ -111,6 +111,10 @@ void TitleScreen::handleEvents(SDL_Event& event, GameState& gameState) {
     }
 }
 
+std::string TitleScreen::getSeedText() const {
+    return seedText;
+}
+
 int TitleScreen::calculateCaretPosition(int mouseX) {
     // Calculate the starting X position of the text
     int startX = inputField.x + 10; // Assuming 10 pixels padding
