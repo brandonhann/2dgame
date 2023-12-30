@@ -6,16 +6,20 @@
 enum TileType {
     GRASS,
     WATER,
-    WALL,
     SAND,
-    SNOW
+    SNOW,
+    DEEP_WATER,
+    MUD,
+    ICE,
+    SNOWY_GRASS,
+    SNOWY_SAND,
+    SNOWY_MUD,
 };
 
 class Tile {
 public:
     Tile(TileType type, int x, int y);
     void render(SDL_Renderer* renderer, SDL_Rect& camera);
-    bool isWalkable();
     TileType getType() const { return type; }
     static void setTilesetTexture(SDL_Texture* newTexture);
      static void loadTilesetTexture(SDL_Renderer* renderer, const char* filePath);

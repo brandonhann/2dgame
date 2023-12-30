@@ -26,6 +26,8 @@ void Tile::loadTilesetTexture(SDL_Renderer* renderer, const char* filePath) {
     Tile::tilesetTexture = newTexture;
 }
 
+// TODO generate properites for these types, maybe keep it in a JSON file. (example: WALKSPEED, COLLIDE, FLOAT, SLIP)
+
 // Render method now uses the texture
 void Tile::render(SDL_Renderer* renderer, SDL_Rect& camera) {
     SDL_Rect renderQuad = {destRect.x - camera.x, destRect.y - camera.y, destRect.w, destRect.h};
@@ -54,10 +56,4 @@ void Tile::render(SDL_Renderer* renderer, SDL_Rect& camera) {
 
     // Render the part of the texture to the screen
     SDL_RenderCopy(renderer, Tile::tilesetTexture, &srcRect, &renderQuad);
-}
-
-bool Tile::isWalkable() {
-    // Implement logic to determine if a tile is walkable
-    // For example, assuming WALL is not walkable
-    return type != WALL;
 }
