@@ -20,7 +20,10 @@ Game::Game()
       chunkSize(32), 
       seed(12345), 
       gameMap(seed),
-    seedNeedsUpdate(false) { 
+      seedNeedsUpdate(false),
+      displaySeedMessage(true),
+      seedMessageStartTime(SDL_GetTicks())
+{ 
     player = new Player(100, 100); // Initialize player with a position
     camera = {0, 0, 800, 600};
 
@@ -133,7 +136,7 @@ void Game::update() {
         seedNeedsUpdate = false;
     }
 
-    // The rest of your existing update logic
+    // Rest of the update logic remains the same
     Uint32 frameStart = SDL_GetTicks();
 
     auto getChunkIndex = [this](int coordinate) -> int {
@@ -170,16 +173,31 @@ void Game::update() {
 }
 
 void Game::render() {
+    SDL_RenderClear(renderer);
+
     switch (gameState) {
         case GameState::TITLE_SCREEN:
             titleScreen->render();
             break;
+
         case GameState::GAMEPLAY:
-            SDL_RenderClear(renderer);
             // Render game-related objects here
             gameMap.render(renderer, camera);
             player->render(renderer, camera);
-            // You can add more rendering logic for gameplay elements here
+
+            // Display the seed message only once when entering the gameplay state
+            if (displaySeedMessage) {
+                std::string seedMessage = "Generated with seed: " + std::to_string(seed);
+                // Display the message on the screen
+                // Note: Add rendering logic for displaying the seed message on the screen
+                std::cout << seedMessage << std::endl; // Temporary console output for testing
+                
+                // After displaying the message, set the flag to false to prevent repeated displaying
+                displaySeedMessage = false;
+            }
+
+            // More gameplay rendering logic can be added here
+
             SDL_RenderPresent(renderer);
             break;
     }

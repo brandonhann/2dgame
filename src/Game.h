@@ -38,6 +38,9 @@ private:
     int chunkSize;
     unsigned int seed;
     bool seedNeedsUpdate;
+    bool displaySeedMessage;
+    Uint32 seedMessageStartTime;
+    const Uint32 seedMessageDuration = 5000; // 5 seconds
 };
 
 #endif
