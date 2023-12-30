@@ -3,7 +3,8 @@
 
 enum class GameState {
     TITLE_SCREEN,
-    GAMEPLAY
+    GAMEPLAY,
+    QUIT
 };
 
 #endif

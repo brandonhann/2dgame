@@ -60,11 +60,11 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
                 // Load the tileset texture for the Tile class
                 Tile::loadTilesetTexture(renderer, "assets/tilemap.png");
                 // Load the player texture
-                Player::loadPlayerTexture(renderer, "assets/player_sprite_map.png"); // This is the new line to add
+                Player::loadPlayerTexture(renderer, "assets/player_sprite_map.png");
             }
 
             // Set draw color for renderer to white
-            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White background
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         }
         isRunning = true;
     } else {
@@ -74,10 +74,12 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
     // Initialize SDL_ttf
     if (TTF_Init() == -1) {
         std::cerr << "SDL_ttf could not initialize! SDL_ttf Error: " << TTF_GetError() << std::endl;
-        // Handle error (possibly exit the program)
     }
 
-    titleScreen = new TitleScreen(renderer);
+    // Start accepting text input
+    SDL_StartTextInput();
+
+    titleScreen = new TitleScreen(renderer, width, height);
 }
 
 void Game::handleEvents() {
@@ -97,12 +99,23 @@ void Game::handleEvents() {
             // Handle events specific to the gameplay
             if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
                 player->handleInput(event); // Delegate to player input handling
-            } else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                camera.w = event.window.data1;
-                camera.h = event.window.data2;
             }
         }
-        // Additional event handling for other game states can be added here
+
+        // Handling window resize event
+        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
+            int newWidth = event.window.data1;
+            int newHeight = event.window.data2;
+
+            // Update camera size with the new window dimensions
+            camera.w = newWidth;
+            camera.h = newHeight;
+
+            // Update title screen layout if we're on the title screen
+            if (gameState == GameState::TITLE_SCREEN) {
+                titleScreen->handleWindowSizeChange(newWidth, newHeight);
+            }
+        }
     }
 }
 
@@ -174,10 +187,9 @@ void Game::render() {
 
 void Game::clean() {
     delete titleScreen;
-
-    // Clean up the tileset texture
     Tile::freeTilesetTexture();
     Player::destroyTexture();
+    SDL_StopTextInput();
     TTF_Quit();
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
