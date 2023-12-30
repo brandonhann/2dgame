@@ -5,19 +5,68 @@
 const float Player::BIOME_CHANGE_COOLDOWN = 1.0f;
 SDL_Texture* Player::playerTexture = nullptr;
 
-Player::Player(int x, int y) : x(x), y(y), speed(5), currentBiome(""), lastBiome(""), timeSinceLastBiomeChange(0.0f) {    
-    srcRect = { 0, 0, 32, 64 }; // Update the size of the texture frame to 32x64
-    destRect = { x, y, 32, 64 }; // Update the size and position on the screen to 32x64
+Player::Player(int x, int y) : x(x), y(y), speed(5), frameIndex(0), frameTime(0.0f), animationSpeed(0.1f) {
+    idleSrcRect = { 0, 0, 32, 32 };
+    walkingSrcRects[0][0] = { 32, 0, 32, 32 }; // Down
+    walkingSrcRects[0][1] = { 64, 0, 32, 32 }; // Down
+    walkingSrcRects[3][0] = { 96, 0, 32, 32 }; // Right
+    walkingSrcRects[3][1] = { 128, 0, 32, 32 }; // Right
+    walkingSrcRects[2][0] = { 160, 0, 32, 32 }; // Up
+    walkingSrcRects[2][1] = { 192, 0, 32, 32 }; // Up
+    walkingSrcRects[1][0] = { 224, 0, 32, 32 }; // Left
+    walkingSrcRects[1][1] = { 256, 0, 32, 32 }; // Left
+    destRect = { x, y, 32, 32 };
+}
+
+void Player::updateAnimation(float deltaTime) {
+    frameTime += deltaTime;
+    if (frameTime >= animationSpeed) {
+        frameIndex = (frameIndex + 1) % 2; // Assuming 2 frames per direction
+        frameTime = 0.0f;
+    }
+
+    int direction = 0; // 0: down, 1: left, 2: up, 3: right
+    if (movingUp) {
+        direction = 2;
+    } else if (movingDown) {
+        direction = 0;
+    } else if (movingLeft) {
+        direction = 1;
+    } else if (movingRight) {
+        direction = 3;
+    }
+
+    if (movingUp || movingDown || movingLeft || movingRight) {
+        srcRect = walkingSrcRects[direction][frameIndex];
+    } else {
+        srcRect = idleSrcRect;
+    }
 }
 
 void Player::update(float deltaTime) {
-    if (movingUp) y -= speed;
-    if (movingDown) y += speed;
-    if (movingLeft) x -= speed;
-    if (movingRight) x += speed;
+    float moveX = 0.0f;
+    float moveY = 0.0f;
+
+    if (movingUp) moveY -= 1.0f;
+    if (movingDown) moveY += 1.0f;
+    if (movingLeft) moveX -= 1.0f;
+    if (movingRight) moveX += 1.0f;
+
+    // Normalize the movement vector if the player is moving diagonally
+    if (moveX != 0.0f && moveY != 0.0f) {
+        const float invLength = 1.0f / sqrt(moveX * moveX + moveY * moveY);
+        moveX *= invLength;
+        moveY *= invLength;
+    }
+
+    x += moveX * speed;
+    y += moveY * speed;
 
     destRect.x = x;
     destRect.y = y;
+
+    // Update the animation based on movement
+    updateAnimation(deltaTime);
 }
 
 void Player::handleInput(const SDL_Event& event) {

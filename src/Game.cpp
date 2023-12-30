@@ -43,7 +43,7 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
                 // Load the tileset texture for the Tile class
                 Tile::loadTilesetTexture(renderer, "assets/tilemap.png");
                 // Load the player texture
-                Player::loadPlayerTexture(renderer, "assets/player.png"); // This is the new line to add
+                Player::loadPlayerTexture(renderer, "assets/player_sprite_map.png"); // This is the new line to add
             }
 
             // Set draw color for renderer to white
