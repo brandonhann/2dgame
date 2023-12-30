@@ -3,6 +3,7 @@
 #include "TitleScreen.h"
 #include <iostream>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 Game::Game() 
     : gameState(GameState::TITLE_SCREEN), 
@@ -70,30 +71,37 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
         std::cerr << "SDL could not initialize! SDL_Error: " << SDL_GetError() << std::endl;
     }
 
+    // Initialize SDL_ttf
+    if (TTF_Init() == -1) {
+        std::cerr << "SDL_ttf could not initialize! SDL_ttf Error: " << TTF_GetError() << std::endl;
+        // Handle error (possibly exit the program)
+    }
+
     titleScreen = new TitleScreen(renderer);
 }
 
 void Game::handleEvents() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT) {
+            isRunning = false;  // This will handle the window close button in any state.
+            return; // Exit the function early
+        }
+
         if (gameState == GameState::TITLE_SCREEN) {
-            // Handle events specific to the title screen
             titleScreen->handleEvents(event, gameState);
             if (gameState == GameState::GAMEPLAY) {
                 seedNeedsUpdate = true; // Flag to update the seed in the update method
             }
         } else if (gameState == GameState::GAMEPLAY) {
             // Handle events specific to the gameplay
-            if (event.type == SDL_QUIT) {
-                isRunning = false;
-            } else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
+            if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP) {
                 player->handleInput(event); // Delegate to player input handling
             } else if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED) {
                 camera.w = event.window.data1;
                 camera.h = event.window.data2;
             }
         }
-
         // Additional event handling for other game states can be added here
     }
 }
@@ -169,8 +177,8 @@ void Game::clean() {
 
     // Clean up the tileset texture
     Tile::freeTilesetTexture();
-
     Player::destroyTexture();
+    TTF_Quit();
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(renderer);
     SDL_Quit();
