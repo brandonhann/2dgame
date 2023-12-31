@@ -7,12 +7,22 @@
 UIManager::UIManager(SDL_Renderer* renderer, int windowWidth, int windowHeight)
     : renderer(renderer), windowWidth(windowWidth), windowHeight(windowHeight), 
       isInputActive(false), caretPosition(0), caretVisible(true), lastCaretToggle(SDL_GetTicks()) {
+    
+    // Load the font once here
     font = TTF_OpenFont(ROOT_PATH "assets/Fixedsys.ttf", 24);
+
+    // Initialize the layout
     updateLayout();
 
     // Initialize seed text with a random value
     unsigned int initialSeed = static_cast<unsigned int>(time(nullptr));
     seedText = std::to_string(initialSeed);
+}
+
+UIManager::~UIManager() {
+    if (font) {
+        TTF_CloseFont(font);
+    }
 }
 
 void UIManager::updateLayout() {
@@ -34,6 +44,7 @@ void UIManager::handleEvents(SDL_Event& event) {
         int x = event.button.x;
         int y = event.button.y;
 
+        // Check if click is inside the input field
         if (x >= inputField.x && x <= inputField.x + inputField.w &&
             y >= inputField.y && y <= inputField.y + inputField.h) {
             isInputActive = true;
@@ -43,12 +54,17 @@ void UIManager::handleEvents(SDL_Event& event) {
             isInputActive = false;
             SDL_StopTextInput();
         }
-
-        // More event handling if needed
     }
 
     if (isInputActive) {
-        handleKeyboardInput(event);
+        if (event.type == SDL_TEXTINPUT) {
+            // Insert the text at the caret position
+            seedText.insert(caretPosition, event.text.text);
+            caretPosition += strlen(event.text.text);
+            adjustInputFieldSize();
+        } else {
+            handleKeyboardInput(event);
+        }
     }
 }
 
@@ -125,19 +141,14 @@ int UIManager::calculateCaretPosition(int mouseX) {
 }
 
 void UIManager::adjustInputFieldSize() {
-    TTF_Font* font = TTF_OpenFont(ROOT_PATH "assets/Fixedsys.ttf", 24);
-    if (font != nullptr) {
-        int textWidth, textHeight;
-        TTF_SizeText(font, seedText.c_str(), &textWidth, &textHeight);
+    int textWidth, textHeight;
+    TTF_SizeText(font, seedText.c_str(), &textWidth, &textHeight);
 
-        // Update input field width to fit the text, with some padding
-        inputField.w = std::max(100, textWidth + 20); // Minimum width is 100
+    // Update input field width to fit the text, with some padding
+    inputField.w = std::max(100, textWidth + 20); // Minimum width is 100
 
-        // Center the input field based on the new width
-        inputField.x = windowWidth / 2 - inputField.w / 2;
-
-        TTF_CloseFont(font);
-    }
+    // Center the input field based on the new width
+    inputField.x = windowWidth / 2 - inputField.w / 2;
 }
 
 void UIManager::updateCaretVisibility() {

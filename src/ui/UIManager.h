@@ -8,6 +8,7 @@
 class UIManager {
 public:
     UIManager(SDL_Renderer* renderer, int windowWidth, int windowHeight);
+    ~UIManager();
     void handleEvents(SDL_Event& event);
     void render();
     void handleWindowSizeChange(int newWidth, int newHeight);
