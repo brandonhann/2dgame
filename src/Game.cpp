@@ -61,13 +61,15 @@ void Game::init(const char* title, int xpos, int ypos, int width, int height, bo
                 std::cerr << "SDL_image could not initialize! SDL_image Error: " << IMG_GetError() << std::endl;
             } else {
                 // Load the tileset texture for the Tile class
-                Tile::loadTilesetTexture(renderer, "assets/tilemap.png");
+                Tile::loadTilesetTexture(renderer, ROOT_PATH "assets/tilemap.png");
                 // Load the player texture
-                Player::loadPlayerTexture(renderer, "assets/player_sprite_map.png");
+                Player::loadPlayerTexture(renderer, ROOT_PATH "assets/player_sprite_map.png");
             }
 
             // Set draw color for renderer to white
             SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        } else {
+            std::cerr << "Renderer could not be created! SDL Error: " << SDL_GetError() << std::endl;
         }
         isRunning = true;
     } else {

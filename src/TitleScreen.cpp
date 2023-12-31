@@ -8,7 +8,7 @@
 TitleScreen::TitleScreen(SDL_Renderer* renderer, int windowWidth, int windowHeight)
     : renderer(renderer), windowWidth(windowWidth), windowHeight(windowHeight), 
       isInputActive(false), caretPosition(0), caretVisible(true), lastCaretToggle(SDL_GetTicks()) {
-    font = TTF_OpenFont("assets/Fixedsys.ttf", 24);
+    font = TTF_OpenFont(ROOT_PATH "assets/Fixedsys.ttf", 24);
     // Define the play button dimensions and position
     playButton.x = 350; // Example position, adjust as needed
     playButton.y = 300; // Example position, adjust as needed
@@ -152,7 +152,7 @@ void TitleScreen::handleKeyboardInput(const SDL_Event& event) {
 }
 
 void TitleScreen::adjustInputFieldSize() {
-    TTF_Font* font = TTF_OpenFont("assets/Fixedsys.ttf", 24);
+    TTF_Font* font = TTF_OpenFont(ROOT_PATH "assets/Fixedsys.ttf", 24);
     if (font != nullptr) {
         int textWidth, textHeight;
         TTF_SizeText(font, seedText.c_str(), &textWidth, &textHeight);
@@ -191,7 +191,7 @@ void TitleScreen::render() {
 
     // Render the text "Play" onto the button
     SDL_Rect playButtonTextRect = {playButton.x, playButton.y, playButton.w, playButton.h};
-    renderText("Play", "assets/Fixedsys.ttf", 24, playButtonTextRect, {0, 0, 0, 255});
+    renderText("Play", ROOT_PATH "assets/Fixedsys.ttf", 24, playButtonTextRect, {0, 0, 0, 255});
 
     // Adjust the input field size based on the seed text length
     adjustInputFieldSize();
@@ -207,7 +207,7 @@ void TitleScreen::render() {
 
     // Render the seed text inside the input field
     SDL_Rect seedTextBox = {inputField.x + 10, inputField.y + 5, inputField.w - 20, inputField.h - 10};
-    renderText(seedText, "assets/Fixedsys.ttf", 24, seedTextBox, {0, 0, 0, 255});
+    renderText(seedText, ROOT_PATH "assets/Fixedsys.ttf", 24, seedTextBox, {0, 0, 0, 255});
 
     // Render the caret if input field is active
     if (isInputActive && caretVisible) {
