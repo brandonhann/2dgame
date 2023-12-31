@@ -20,8 +20,11 @@ Player::Player(int x, int y) : x(x), y(y), speed(5), frameIndex(0), frameTime(0.
 
 void Player::updateAnimation(float deltaTime) {
     frameTime += deltaTime;
+
+    // Check if it's time to update the frame
     if (frameTime >= animationSpeed) {
-        frameIndex = (frameIndex + 1) % 2; // Assuming 2 frames per direction
+        // Update the frame index
+        frameIndex = (frameIndex + 1) % 2;
         frameTime = 0.0f;
     }
 

@@ -23,7 +23,8 @@ Game::Game()
       gameMap(seed), // Initialize map with seed
       seedNeedsUpdate(false),
       displaySeedMessage(true),
-      seedMessageStartTime(SDL_GetTicks())
+      seedMessageStartTime(SDL_GetTicks()),
+      lastFrameStart(SDL_GetTicks())
 {
     // Initialize player and camera only once, remove re-initialization from here
     int initialChunkX = player->getX() / (32 * chunkSize);
@@ -139,13 +140,12 @@ void Game::update() {
         seedNeedsUpdate = false;
     }
 
+    // Capture the start time of the current frame
     Uint32 frameStart = SDL_GetTicks();
 
-    auto getChunkIndex = [this](int coordinate) -> int {
-        return coordinate / (32 * chunkSize);
-    };
-
-    float deltaTime = (SDL_GetTicks() - frameStart) / 1000.0f;
+    // Calculate deltaTime using the difference between the current frame start time and the last frame start time
+    float deltaTime = (frameStart - lastFrameStart) / 1000.0f;
+    lastFrameStart = frameStart;  // Update lastFrameStart for the next frame
 
     player->update(deltaTime);
     camera->update(player->getX(), player->getY());
@@ -166,7 +166,9 @@ void Game::update() {
 
     gameMap.removeOutOfViewChunks(visibleStartX, visibleEndX, visibleStartY, visibleEndY);
 
+    // Calculate how long the current frame took to process
     Uint32 frameTime = SDL_GetTicks() - frameStart;
+    // If the frame processed faster than our target frame rate, delay the next frame
     if (frameDelay > frameTime) {
         SDL_Delay(frameDelay - frameTime);
     }
