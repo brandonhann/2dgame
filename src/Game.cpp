@@ -98,7 +98,7 @@ void Game::handleEvents() {
         if (gameState == GameState::TITLE_SCREEN) {
             titleScreen->handleEvents(event, gameState);
             if (gameState == GameState::GAMEPLAY) {
-                std::string userInputSeed = titleScreen->getSeedText();
+                std::string userInputSeed = titleScreen->getUIManagerSeedText();
                 seed = hashStringToUnsignedInt(userInputSeed);
                 gameMap = Map(seed);
                 seedNeedsUpdate = false;
@@ -182,7 +182,8 @@ void Game::render() {
 
         case GameState::GAMEPLAY:
             if (displaySeedMessage) {
-                std::string seedMessage = "Generated with seed: " + titleScreen->getSeedText();
+                // Adjusted to use the new method in TitleScreen that accesses UIManager's getSeedText()
+                std::string seedMessage = "Generated with seed: " + titleScreen->getUIManagerSeedText();
                 std::cout << seedMessage << std::endl;
                 displaySeedMessage = false;
             }

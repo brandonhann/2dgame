@@ -18,7 +18,8 @@ include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_I
 add_definitions(-DROOT_PATH="${CMAKE_SOURCE_DIR}/")
 
 # Add the executable with the desired name 'game'
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+# Include all .cpp files from src and src/ui directories
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/ui/*.cpp")
 add_executable(game ${SOURCES})
 
 # Link SDL2 and extensions with your executable
