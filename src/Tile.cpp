@@ -1,59 +1,91 @@
 #include "Tile.h"
-#include <SDL_image.h> // Make sure to include SDL_image for texture loading
+#include <SDL_image.h>
+#include <nlohmann/json.hpp>
+#include <fstream>
 #include <iostream>
 
-// Static member for the texture
-SDL_Texture* Tile::tilesetTexture = nullptr;
+using json = nlohmann::json;
 
-// Constructor remains the same
+// Static member initialization
+SDL_Texture* Tile::tilesetTexture = nullptr;
+json Tile::tileProperties = json();
+
+// Constructor
 Tile::Tile(TileType type, int x, int y) : type(type) {
-    srcRect = {0, 0, 32, 32}; // Size of the texture frame
     destRect = {x, y, 32, 32}; // Size and position on the screen
+    setPropertiesFromJson();
 }
 
-// Static method to load the tileset texture
+// Load the tileset texture
 void Tile::loadTilesetTexture(SDL_Renderer* renderer, const char* filePath) {
-    // Load the texture from a file
     SDL_Texture* newTexture = IMG_LoadTexture(renderer, filePath);
-    if(newTexture == nullptr) {
+    if (newTexture == nullptr) {
         std::cerr << "Failed to load texture: " << SDL_GetError() << std::endl;
         return;
     }
-    // If a texture is already loaded, destroy it before replacing
-    if(Tile::tilesetTexture != nullptr) {
+    if (Tile::tilesetTexture != nullptr) {
         SDL_DestroyTexture(Tile::tilesetTexture);
     }
     Tile::tilesetTexture = newTexture;
 }
 
-// TODO generate properites for these types, maybe keep it in a JSON file. (example: WALKSPEED, COLLIDE, FLOAT, SLIP)
+// Load and parse the JSON file for tile properties
+void Tile::loadTileProperties(const std::string& filePath) {
+    std::ifstream file(filePath);
+    if (file.is_open()) {
+        file >> Tile::tileProperties;
+    } else {
+        std::cerr << "Failed to open tile properties file: " << filePath << std::endl;
+    }
+}
 
-// Render method now uses the texture
-void Tile::render(SDL_Renderer* renderer, SDL_Rect& camera) {
-    SDL_Rect renderQuad = {destRect.x - camera.x, destRect.y - camera.y, destRect.w, destRect.h};
-    
-    // Here you'll set srcRect to the correct texture position based on the tile type
-    switch(type) {
-        case GRASS:
-            srcRect.x = 0;
-            srcRect.y = 0;
-            break;
-        case WATER:
-            srcRect.x = 32;
-            srcRect.y = 0;
-            break;
-        case SAND:
-            srcRect.x = 64;
-            srcRect.y = 0;
-            break;
-        case SNOW:
-            srcRect.x = 96;
-            srcRect.y = 0;
-            break;
-        // Add additional cases for other tile types
-        // ...
+// Free the tileset texture
+void Tile::freeTilesetTexture() {
+    if (Tile::tilesetTexture != nullptr) {
+        SDL_DestroyTexture(Tile::tilesetTexture);
+        tilesetTexture = nullptr;
+    }
+}
+
+// Set properties based on JSON data
+void Tile::setPropertiesFromJson() {
+    std::string tileTypeName = getTileTypeName();
+    if (!Tile::tileProperties.contains(tileTypeName)) {
+        std::cerr << "Tile type not found in JSON: " << tileTypeName << std::endl;
+        return;
     }
 
-    // Render the part of the texture to the screen
+    json props = Tile::tileProperties[tileTypeName];
+    
+    // Set srcRect from JSON
+    if (props.contains("srcRect") && props["srcRect"].is_object()) {
+        json srcRectJson = props["srcRect"];
+        srcRect.x = srcRectJson.value("x", 0);
+        srcRect.y = srcRectJson.value("y", 0);
+        srcRect.w = srcRect.h = 32; // Assuming each tile is 32x32
+    } else {
+        std::cerr << "srcRect not found or invalid for tile type: " << tileTypeName << std::endl;
+    }
+
+    // Set other properties here as needed
+    // Example: 
+    // bool isWater = props.value("isWater", false);
+}
+
+// Convert TileType enum to string for JSON key
+std::string Tile::getTileTypeName() {
+    switch (type) {
+        case GRASS: return "GRASS";
+        case WATER: return "WATER";
+        case SAND: return "SAND";
+        case SNOW: return "SNOW";
+        // ... Add cases for other tile types
+        default: return "UNKNOWN";
+    }
+}
+
+// Render method
+void Tile::render(SDL_Renderer* renderer, SDL_Rect& camera) {
+    SDL_Rect renderQuad = {destRect.x - camera.x, destRect.y - camera.y, destRect.w, destRect.h};
     SDL_RenderCopy(renderer, Tile::tilesetTexture, &srcRect, &renderQuad);
 }

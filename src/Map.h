@@ -27,6 +27,8 @@ public:
     static const int numberOfChunksWidth; // Define these based on your map's size
     static const int numberOfChunksHeight;
 
+    void loadTileProperties();
+
 private:
     TileType generateGrasslandTile(float noiseValue, float riverNoiseValue, float biomeValue, int x, int y);
     TileType generateSnowTile(float noiseValue, float biomeValue, int x, int y);

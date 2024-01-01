@@ -1,3 +1,96 @@
 {
-
+  "GRASS": {
+    "srcRect": {"x": 0, "y": 0},
+    "soundId": 1,
+    "isFast": false,
+    "isSlow": false,
+    "isSlippery": false,
+    "isWater": false,
+    "isHot": false,
+    "canCollide": false
+  },
+  "WATER": {
+    "srcRect": {"x": 32, "y": 0},
+    "soundId": 2,
+    "isFast": false,
+    "isSlow": false,
+    "isSlippery": false,
+    "isWater": true,
+    "isHot": false,
+    "canCollide": false
+  },
+  "SAND": {
+    "srcRect": {"x": 64, "y": 0},
+    "soundId": 3,
+    "isFast": false,
+    "isSlow": false,
+    "isSlippery": false,
+    "isWater": false,
+    "isHot": false,
+    "canCollide": false
+    },
+  "SNOW": {
+    "srcRect": {"x": 96, "y": 0},
+    "soundId": 4,
+    "isFast": false,
+    "isSlow": true,
+    "isSlippery": false,
+    "isWater": false,
+    "isHot": false,
+    "canCollide": false
+  },
+    "DEEP_WATER": {
+    "soundId": 5,
+    "isFast": false,
+    "isSlow": false,
+    "isSlippery": false,
+    "isWater": true,
+    "isHot": false,
+    "canCollide": false
+  },
+    "MUD": {
+    "soundId": 6,
+    "isFast": false,
+    "isSlow": true,
+    "isSlippery": false,
+    "isWater": false,
+    "isHot": false,
+    "canCollide": false
+  },
+    "ICE": {
+    "soundId": 7,
+    "isFast": false,
+    "isSlow": false,
+    "isSlippery": true,
+    "isWater": false,
+    "isHot": false,
+    "canCollide": false
+  },
+    "SNOWY_GRASS": {
+    "soundId": 8,
+    "isFast": false,
+    "isSlow": false,
+    "isSlippery": false,
+    "isWater": false,
+    "isHot": false,
+    "canCollide": false
+  },
+    "SNOWY_SAND": {
+    "soundId": 9,
+    "isFast": false,
+    "isSlow": false,
+    "isSlippery": false,
+    "isWater": false,
+    "isHot": false,
+    "canCollide": false
+  },
+    "SNOWY_MUD": {
+    "soundId": 10,
+    "isFast": false,
+    "isSlow": false,
+    "isSlippery": false,
+    "isWater": false,
+    "isHot": false,
+    "canCollide": false
+  }
 }

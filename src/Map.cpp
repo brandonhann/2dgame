@@ -18,6 +18,12 @@ Map::Map(unsigned int seed) : seed(seed), chunkSize(32),
     biomeNoise.SetSeed(seed + 1);
     riverNoise.SetSeed(seed + 2);
     riverNoise.SetFrequency(0.05);
+
+    loadTileProperties();
+}
+
+void Map::loadTileProperties() {
+    Tile::loadTileProperties(ROOT_PATH "src/tile_props.json");
 }
 
 TileType Map::generateGrasslandTile(float noiseValue, float riverNoiseValue, float biomeValue, int x, int y) {

@@ -17,10 +17,19 @@ include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_I
 # Add a preprocessor definition for the project root directory
 add_definitions(-DROOT_PATH="${CMAKE_SOURCE_DIR}/")
 
+# Fetch nlohmann/json
+include(FetchContent)
+FetchContent_Declare(
+  json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.10.5 # or whatever version you want
+)
+FetchContent_MakeAvailable(json)
+
 # Add the executable with the desired name 'game'
 # Include all .cpp files from src and src/ui directories
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/ui/*.cpp")
 add_executable(game ${SOURCES})
 
 # Link SDL2 and extensions with your executable
-target_link_libraries(game ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})
+target_link_libraries(game ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} nlohmann_json::nlohmann_json)
